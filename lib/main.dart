@@ -3,8 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'class_model.dart';
 
-enum Swipe { left, right, none }
-
 Future<DndClass> fetchDndClass(String itemUrl) async {
   final response =
       await http.get(Uri.parse('https://www.dnd5eapi.co/api/classes/$itemUrl'));
@@ -185,40 +183,138 @@ class DndClassDetailScreen extends StatelessWidget {
             } else {
               final dndClass = snapshot.data!;
 
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Class Name: ${dndClass.name}'),
-                  Text('Hit Die: ${dndClass.hitDie.toString()}'),
-                  Text('Index: ${dndClass.index.toString()}'),
-                  dndClass.spells != null
-                      ? Text('Spells: ${dndClass.spells}')
-                      : const SizedBox.shrink(),
-                  if (dndClass.proficiencyChoices != null)
-                    ExpansionTile(
-                      title: Text('Proficiency Choices'),
-                      children: [
-                        for (var choice in dndClass.proficiencyChoices!)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text('Description: ${choice.desc}'),
-                              Text('Choose: ${choice.choose.toString()}'),
-                              Text('Type: ${choice.type}'),
-                              if (choice.from != null)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Class Name: ${dndClass.name}',
+                          textAlign: TextAlign.left),
+                      Text('Hit Die: ${dndClass.hitDie.toString()}',
+                          textAlign: TextAlign.left),
+                      Text('Index: ${dndClass.index.toString()}',
+                          textAlign: TextAlign.left),
+                      dndClass.spells != null
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text('Spells: ${dndClass.spells}',
+                                  textAlign: TextAlign.left),
+                            )
+                          : const SizedBox.shrink(),
+                      if (dndClass.proficiencyChoices != null)
+                        ExpansionTile(
+                          title: Text('Proficiency Choices',
+                              textAlign: TextAlign.left),
+                          children: [
+                            for (var proficiencyChoice
+                                in dndClass.proficiencyChoices!)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8.0, left: 16.0),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
-                                    Text('Options:'),
-                                    for (var option in choice.from!)
-                                      Text('Item Name: ${option.item.name}'),
+                                    Text(
+                                        'Description: ${proficiencyChoice.desc}',
+                                        textAlign: TextAlign.left),
+                                    Text(
+                                        'Choose: ${proficiencyChoice.choose.toString()}',
+                                        textAlign: TextAlign.left),
+                                    Text('Type: ${proficiencyChoice.type}',
+                                        textAlign: TextAlign.left),
+                                    if (proficiencyChoice.from != null)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Options:',
+                                              textAlign: TextAlign.left),
+                                          for (var option
+                                              in proficiencyChoice.from!)
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0, left: 16.0),
+                                              child: Text(
+                                                  'Item Name: ${option.item.name}',
+                                                  textAlign: TextAlign.left),
+                                            ),
+                                        ],
+                                      ),
                                   ],
                                 ),
-                            ],
-                          ),
-                      ],
-                    ),
-                ],
+                              ),
+                          ],
+                        ),
+                      if (dndClass.proficiencies != null)
+                        ExpansionTile(
+                          title:
+                              Text('Proficiencies', textAlign: TextAlign.left),
+                          children: [
+                            for (var proficiency in dndClass.proficiencies!)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 12.0, left: 16.0),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text('Name: ${proficiency.name}'),
+                                    Text('url: ${proficiency.url}'),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      if (dndClass.savingThrows != null)
+                        ExpansionTile(
+                          title:
+                              Text('Saving throws', textAlign: TextAlign.left),
+                          children: [
+                            for (var savingThrow in dndClass.savingThrows!)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 12.0, left: 16.0),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text('Name: ${savingThrow.name}'),
+                                    Text('url: ${savingThrow.url}'),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      if (dndClass.startingEquipment != null)
+                        ExpansionTile(
+                          title: Text('Starting Equipment',
+                              textAlign: TextAlign.left),
+                          children: [
+                            for (var equipment in dndClass.startingEquipment!)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8.0, left: 16.0),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                        'Equipment Name: ${equipment.equipment.name}'),
+                                    Text(
+                                        'Quantity: ${equipment.quantity.toString()}'),
+                                    Text(
+                                        'Equipment URL: ${equipment.equipment.url}'),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
               );
             }
           },
@@ -243,7 +339,7 @@ class DndClassListScreen extends StatelessWidget {
               'classes'), //método consulta as classes do endpoint
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const CircularProgressIndicator(); // Loading enquanto o Endpoint retorna os dados.
             } else {
               final apiItems = snapshot.data!;
               return ListView.builder(

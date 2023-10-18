@@ -4,30 +4,116 @@ class DndClass {
   final int hitDie;
   final String? spells;
   final List<ProficiencyChoice>? proficiencyChoices;
+  final List<Proficiency>? proficiencies;
+  final List<SavingThrows>? savingThrows;
+  final List<StartingEquipment>? startingEquipment;
 
-  DndClass({
-    required this.name,
-    required this.index,
-    required this.hitDie,
-    required this.spells,
-    required this.proficiencyChoices,
-  });
+  DndClass(
+      {required this.name,
+      required this.index,
+      required this.hitDie,
+      required this.spells,
+      required this.proficiencyChoices,
+      required this.proficiencies,
+      required this.savingThrows,
+      required this.startingEquipment});
 
   factory DndClass.fromJson(Map<String, dynamic> json) {
     List<ProficiencyChoice>? proficiencyChoices;
+    List<Proficiency>? proficiencies;
+    List<SavingThrows>? savingThrows;
+    List<StartingEquipment>? startingEquipment;
+
     if (json['proficiency_choices'] != null) {
       proficiencyChoices = List<ProficiencyChoice>.from(
           json['proficiency_choices'].map((choice) =>
               ProficiencyChoice.fromJson(choice as Map<String, dynamic>)));
     }
 
+    if (json['proficiencies'] != null) {
+      proficiencies = List<Proficiency>.from(json['proficiencies'].map(
+          (choice) => Proficiency.fromJson(choice as Map<String, dynamic>)));
+    }
+
+    if (json['saving_throws'] != null) {
+      savingThrows = List<SavingThrows>.from(json['saving_throws'].map(
+          (choice) => SavingThrows.fromJson(choice as Map<String, dynamic>)));
+    }
+
+    if (json['starting_equipment'] != null) {
+      startingEquipment = List<StartingEquipment>.from(
+          json['starting_equipment'].map((equipment) =>
+              StartingEquipment.fromJson(equipment as Map<String, dynamic>)));
+    }
+
     return DndClass(
-      name: json['name'],
-      index: json['index'],
-      hitDie: json['hit_die'],
-      spells: json['spells'],
-      proficiencyChoices: proficiencyChoices,
+        name: json['name'],
+        index: json['index'],
+        hitDie: json['hit_die'],
+        spells: json['spells'],
+        proficiencyChoices: proficiencyChoices,
+        proficiencies: proficiencies,
+        savingThrows: savingThrows,
+        startingEquipment: startingEquipment);
+  }
+}
+
+class StartingEquipment {
+  final Equipment equipment;
+  final int quantity;
+
+  StartingEquipment({
+    required this.equipment,
+    required this.quantity,
+  });
+
+  factory StartingEquipment.fromJson(Map<String, dynamic> json) {
+    return StartingEquipment(
+      equipment: Equipment.fromJson(json['equipment'] as Map<String, dynamic>),
+      quantity: json['quantity'],
     );
+  }
+}
+
+class Equipment {
+  final String index;
+  final String name;
+  final String url;
+
+  Equipment({
+    required this.index,
+    required this.name,
+    required this.url,
+  });
+
+  factory Equipment.fromJson(Map<String, dynamic> json) {
+    return Equipment(
+      index: json['index'],
+      name: json['name'],
+      url: json['url'],
+    );
+  }
+}
+
+class SavingThrows {
+  final String name;
+  final String url;
+
+  SavingThrows({required this.name, required this.url});
+
+  factory SavingThrows.fromJson(Map<String, dynamic> json) {
+    return SavingThrows(name: json['name'], url: json['url']);
+  }
+}
+
+class Proficiency {
+  final String name;
+  final String url;
+
+  Proficiency({required this.name, required this.url});
+
+  factory Proficiency.fromJson(Map<String, dynamic> json) {
+    return Proficiency(name: json['name'], url: json['url']);
   }
 }
 
