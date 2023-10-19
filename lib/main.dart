@@ -58,24 +58,63 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('D&D API Menu'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/class_list');
-              },
-              child: const Text('List of Classes'),
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(
+                      '../assets/background-theme.jpg'), // Substitua pelo caminho da sua imagem de fundo
+                  fit: BoxFit.fitHeight),
+              gradient: const LinearGradient(begin: Alignment.center, colors: [
+                Color.fromARGB(255, 255, 17, 0),
+                Color.fromARGB(255, 90, 8, 0),
+              ]),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/other_endpoints');
-              },
-              child: const Text('Other Endpoints'),
+          ),
+          Positioned(
+            bottom: 110, // Fixar na parte inferior
+            left: 0,
+            right: 0,
+            child: Container(
+              margin: EdgeInsets.fromLTRB(40, 0, 40, 5),
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 255, 17, 0),
+                    Color.fromARGB(255, 90, 8, 0),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: Color.fromARGB(255, 158, 18, 18),
+                  width: 1,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/class_list');
+                    },
+                    child: const Text('List of Classes'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/other_endpoints');
+                    },
+                    child: const Text('Other Endpoints'),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
