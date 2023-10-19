@@ -69,19 +69,25 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('D&D API Menu'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: <Color>[
+                  Color.fromARGB(255, 148, 0, 0),
+                  Color.fromARGB(255, 56, 0, 0)
+                ]),
+          ),
+        ),
       ),
       body: Stack(
         children: [
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage(
-                      '../assets/background-theme.jpg'), // Substitua pelo caminho da sua imagem de fundo
-                  fit: BoxFit.fitHeight),
-              gradient: const LinearGradient(begin: Alignment.center, colors: [
-                Color.fromARGB(255, 255, 17, 0),
-                Color.fromARGB(255, 90, 8, 0),
-              ]),
+                  image: AssetImage('../assets/background-theme.jpg'),
+                  fit: BoxFit.fill),
             ),
           ),
           Positioned(
@@ -89,15 +95,15 @@ class HomeScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Container(
-              margin: EdgeInsets.fromLTRB(40, 0, 40, 5),
+              margin: EdgeInsets.fromLTRB(40, 0, 40, 0),
               height: 100,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color.fromARGB(255, 255, 17, 0),
-                    Color.fromARGB(255, 90, 8, 0),
+                    Color.fromARGB(225, 204, 14, 0),
+                    Color.fromARGB(225, 90, 8, 0),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(6),
@@ -114,13 +120,31 @@ class HomeScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.pushNamed(context, '/class_list');
                     },
-                    child: const Text('List of Classes'),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Color.fromARGB(255, 68, 0, 0)),
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                    ),
+                    child: const Text(
+                      'List of Classes',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pushNamed(context, '/other_endpoints');
                     },
-                    child: const Text('Other Endpoints'),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Color.fromARGB(255, 68, 0, 0)),
+                      minimumSize:
+                          MaterialStateProperty.all<Size>(Size(200, 50)),
+                    ),
+                    child: const Text(
+                      'Other Endpoints',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
                   ),
                 ],
               ),
