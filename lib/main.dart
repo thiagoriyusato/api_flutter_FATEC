@@ -3,13 +3,25 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'class_model.dart';
 
+final String url = 'https://www.dnd5eapi.co';
+
 Future<DndClass> fetchDndClass(String itemUrl) async {
-  final response =
-      await http.get(Uri.parse('https://www.dnd5eapi.co/api/classes/$itemUrl'));
+  final response = await http.get(Uri.parse('$url/api/classes/$itemUrl'));
 
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
     return DndClass.fromJson(data);
+  } else {
+    throw Exception('Failed to load class data');
+  }
+}
+
+Future<Proficiency> fetchDndProficiency(String itemUrl) async {
+  final response = await http.get(Uri.parse('$url$itemUrl'));
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    return Proficiency.fromJson(data);
   } else {
     throw Exception('Failed to load class data');
   }
@@ -237,8 +249,7 @@ class DndClassDetailScreen extends StatelessWidget {
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   top: 8.0, left: 16.0),
-                                              child: Text(
-                                                  'Item Name: ${option.item.name}',
+                                              child: Text('${option.item.name}',
                                                   textAlign: TextAlign.left),
                                             ),
                                         ],
@@ -254,18 +265,36 @@ class DndClassDetailScreen extends StatelessWidget {
                               Text('Proficiencies', textAlign: TextAlign.left),
                           children: [
                             for (var proficiency in dndClass.proficiencies!)
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 12.0, left: 16.0),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text('Name: ${proficiency.name}'),
-                                    Text('url: ${proficiency.url}'),
-                                  ],
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: ((context) => AlertDialog(
+                                            title: const Text(
+                                                'Proficiency Details'),
+                                            content: DndProficiencyDetail(
+                                                itemUrl: proficiency.url),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'Close'),
+                                                child: const Text('Close'),
+                                              )
+                                            ],
+                                          )));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 12.0, left: 16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Text('Name: ${proficiency.name}'),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                              )
                           ],
                         ),
                       if (dndClass.savingThrows != null)
@@ -312,6 +341,65 @@ class DndClassDetailScreen extends StatelessWidget {
                               ),
                           ],
                         ),
+                      if (dndClass.subclasses != null)
+                        ExpansionTile(
+                          title: Text('Subclasses', textAlign: TextAlign.left),
+                          children: [
+                            for (var subclass in dndClass.subclasses!)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 12.0, left: 16.0),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text('Subclass Name: ${subclass.name}'),
+                                    Text('Subclass Index: ${subclass.index}'),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      if (dndClass.spellcasting != null)
+                        ExpansionTile(
+                          title:
+                              Text('Spellcasting', textAlign: TextAlign.left),
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 12.0, left: 16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                      'Spellcasting Level: ${dndClass.spellcasting?.level.toString()}'),
+                                  SizedBox(
+                                      height:
+                                          8.0), // Espaço vertical entre os itens
+                                  Text(
+                                      'Spellcasting Ability: ${dndClass.spellcasting?.spellcastingAbility.name}'),
+                                  SizedBox(
+                                      height:
+                                          8.0), // Espaço vertical entre os itens
+                                  for (var spellcastingInfo
+                                      in dndClass.spellcasting!.info)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text('Name: ${spellcastingInfo.name}'),
+                                        for (var desc in spellcastingInfo.desc)
+                                          Text(desc),
+                                        SizedBox(
+                                            height:
+                                                8.0), // Espaço vertical entre os itens
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
                     ],
                   ),
                 ),
@@ -370,40 +458,33 @@ class DndClassListScreen extends StatelessWidget {
   }
 }
 
-class DndItemDetailScreen extends StatelessWidget {
+class DndProficiencyDetail extends StatelessWidget {
   final String itemUrl;
 
-  const DndItemDetailScreen({super.key, required this.itemUrl});
+  const DndProficiencyDetail({super.key, required this.itemUrl});
 
   @override
   Widget build(BuildContext context) {
-    // Aqui você pode fazer a requisição usando a URL do item e exibir os detalhes.
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Item Detail'),
-      ),
-      body: Center(
-        child: FutureBuilder<DndClass>(
-          future: fetchDndClass(itemUrl),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              final dndClass = snapshot.data!;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Class Name: ${dndClass.name}'),
-                  Text('Hit Points: ${dndClass.index}'),
-                  Text('Hit Dice: ${dndClass.hitDie}'),
-                ],
-              );
-            }
-          },
-        ),
-      ),
+    return FutureBuilder<Proficiency>(
+      future: fetchDndProficiency(itemUrl),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          final dndClass = snapshot.data!;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Name: ${dndClass.name}'),
+              Text('Type: ${dndClass.type}'),
+            ],
+          );
+        }
+      },
     );
   }
 }
