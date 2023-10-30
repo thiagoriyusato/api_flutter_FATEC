@@ -5,38 +5,43 @@ import 'class_model.dart';
 
 final String url = 'https://www.dnd5eapi.co';
 
-Future<DndClass> fetchDndClass(String itemUrl) async {
-  final response = await http.get(Uri.parse('$url/api/classes/$itemUrl'));
-
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return DndClass.fromJson(data);
-  } else {
-    throw Exception('Failed to load class data');
-  }
-}
-
-Future<Proficiency> fetchDndProficiency(String itemUrl) async {
-  final response = await http.get(Uri.parse('$url$itemUrl'));
-
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    return Proficiency.fromJson(data);
-  } else {
-    throw Exception('Failed to load class data');
-  }
-}
-
 Future<List<DndApiItem>> consultarClasses(String endpoint) async {
-  final response =
-      await http.get(Uri.parse('https://www.dnd5eapi.co/api/$endpoint'));
+  //requisição é feita e atribuída a uma variável
+  final resposta = await http.get(Uri.parse('$url/api/$endpoint'));
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
+  //aqui verificamos se a requisição foi feita com sucesso (200)
+  if (resposta.statusCode == 200) {
+    final data = json.decode(resposta.body);
     final items = List<Map<String, dynamic>>.from(data['results']);
     return items.map((item) => DndApiItem.fromJson(item)).toList();
   } else {
-    throw Exception('Failed to load API data');
+    throw Exception('Failed to load Class List');
+  }
+}
+
+Future<DndClass> consultarClasse(String itemUrl) async {
+  //requisição é feita e atribuída a uma variável
+  final resposta = await http.get(Uri.parse('$url/api/classes/$itemUrl'));
+
+  //aqui verificamos se a requisição foi feita com sucesso (200)
+  if (resposta.statusCode == 200) {
+    final data = json.decode(resposta.body);
+    return DndClass.fromJson(data);
+  } else {
+    throw Exception('Failed to load Class data');
+  }
+}
+
+Future<Proficiency> consultarProeficiencia(String itemUrl) async {
+  //requisição é feita e atribuída a uma variável
+  final resposta = await http.get(Uri.parse('$url$itemUrl'));
+
+  //aqui verificamos se a requisição foi feita com sucesso (200)
+  if (resposta.statusCode == 200) {
+    final data = json.decode(resposta.body);
+    return Proficiency.fromJson(data);
+  } else {
+    throw Exception('Failed to load Proficiency data');
   }
 }
 
@@ -50,12 +55,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'D&D Class App',
+      title: 'Dnd 5e API',
       initialRoute: '/',
       routes: {
         '/': (context) => const HomeScreen(),
         '/class_list': (context) => const DndClassListScreen(),
-        '/other_endpoints': (context) => const OtherEndpointsScreen(),
+        '/class-details': (context) => const DndClassDetailScreen(
+              classUrl: '',
+            ),
       },
     );
   }
@@ -91,7 +98,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: 110, // Fixar na parte inferior
+            bottom: 110,
             left: 0,
             right: 0,
             child: Container(
@@ -131,59 +138,11 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 16.0),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/other_endpoints');
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Color.fromARGB(255, 68, 0, 0)),
-                      minimumSize:
-                          MaterialStateProperty.all<Size>(Size(200, 50)),
-                    ),
-                    child: const Text(
-                      'Other Endpoints',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class OtherEndpointsScreen extends StatelessWidget {
-  const OtherEndpointsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Other Endpoints'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                // Implementação para acessar outros endpoints da API
-              },
-              child: const Text('Endpoint 1'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Implementação para acessar outros endpoints da API
-              },
-              child: const Text('Endpoint 2'),
-            ),
-            // Adicione mais botões conforme necessário
-          ],
-        ),
       ),
     );
   }
@@ -216,13 +175,8 @@ class DndClassMenuScreen extends StatelessWidget {
                     child: ListTile(
                       title: Text(item.name),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                DndClassDetailScreen(classUrl: item.url),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/class-details',
+                            arguments: item.url);
                       },
                     ),
                   );
@@ -249,7 +203,7 @@ class DndClassDetailScreen extends StatelessWidget {
       ),
       body: Center(
         child: FutureBuilder<DndClass>(
-          future: fetchDndClass(classUrl.split('/').last),
+          future: consultarClasse(classUrl.split('/').last),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
@@ -529,7 +483,7 @@ class DndProficiencyDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Proficiency>(
-      future: fetchDndProficiency(itemUrl),
+      future: consultarProeficiencia(itemUrl),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
